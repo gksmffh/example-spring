@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mvc.repository.BoardRepository">
+
+	<select id="getList" parameterType="com.example.mvc.parameter.BoardSearchParameter" resultType="com.example.mvc.domain.Board">
+		SELECT
+			B.BOARD_SEQ,
+			B.TITLE,
+			B.CONTENTS,
+			B.REG_DATE,
+			B.BOARD_TYPE
+		FROM T_BOARD B
+		ORDER BY B.REG_DATE DESC
+		<where>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyword)">
+			AND B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(boardTypes)">
+			AND B.BOARD_TYPE IN(
+				<foreach collection="boardTypes" item = "value" separator=",">
+				#{value}
+				</foreach>
+			)
+			</if>
+		</where>
+	</select>
+	
+	<select id="get" parameterType="int" resultType="com.example.mvc.domain.Board">
+		SELECT
+			B.BOARD_SEQ,
+			B.TITLE,
+			B.CONTENTS,
+			B.REG_DATE,
+			B.BOARD_TYPE
+		FROM T_BOARD B
+		WHERE B.BOARD_SEQ = #{boardSeq}
+	</select>
+	
+	<insert id="save" parameterType="com.example.mvc.parameter.BoardParameter" useGeneratedKeys="true" keyProperty="boardSeq">
+		INSERT INTO T_BOARD
+		(
+			TITLE,
+			CONTENTS,
+			REG_DATE
+		)
+		VALUES
+		(
+			#{title},
+			#{contents},
+			NOW()
+		)
+	</insert>
+	
+	<insert id="saveList" parameterType="map">
+		INSERT INTO T_BOARD
+		(
+			TITLE,
+			CONTENTS,
+			REG_DATE
+		)	
+		VALUES
+		<foreach collection="boardList" item="board" separator=",">
+		(
+			#{board.title},
+			#{board.contents},
+			NOW()
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="com.example.mvc.domain.Board">
+		UPDATE T_BOARD
+		SET
+			TITLE = #{title},
+			CONTENTS = #{contents}
+		WHERE BOARD_SEQ = #{boardSeq}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM T_BOARD
+		WHERE BOARD_SEQ = #{boardSeq}
+	</delete>
+</mapper>
