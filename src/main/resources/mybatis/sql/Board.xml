@@ -1,79 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.mvc.repository.BoardRepository">
-
-	<select id="getList" parameterType="com.example.mvc.parameter.BoardSearchParameter" resultType="com.example.mvc.domain.Board">
+<mapper namespace = "kr.ko.dury008.mvc.repository.BoardRepository">
+	<resultMap type="kr.ko.dury008.mvc.domain.Board" id="getListResultMap">
+		<result column="DEL_YN" property="delYn" typeHandler= "kr.ko.dury008.configuration.mybatis.typehandler.StringValueBooleanTypeHandler"/>
+	</resultMap>
+	<select id="getList" parameterType = "kr.ko.dury008.framework.data.domain.PageRequestParameter" resultMap="getListResultMap">
 		SELECT
 			B.BOARD_SEQ,
+			B.BOARD_TYPE,
 			B.TITLE,
 			B.CONTENTS,
 			B.REG_DATE,
-			B.BOARD_TYPE
+			B.DEL_YN
 		FROM T_BOARD B
-		ORDER BY B.REG_DATE DESC
 		<where>
-			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyword)">
-			AND B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			<if test ="@org.apache.commons.lang3.StringUtils@isNotEmpty(parameter.keyword)">
+			AND B.TITLE LIKE CONCAT('%', #{parameter.keyword}, '%')
 			</if>
-			<if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(boardTypes)">
-			AND B.BOARD_TYPE IN(
-				<foreach collection="boardTypes" item = "value" separator=",">
-				#{value}
+			<if test ="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(parameter.boardTypes)">
+			AND B.BOARD_TYPE IN (
+				<foreach collection = "parameter.boardTypes" item = "value" separator = ",">
+					#{value}
 				</foreach>
 			)
 			</if>
 		</where>
+		ORDER BY B.REG_DATE DESC
+		LIMIT #{pageRequest.limit}, #{pageRequest.offset}
+		
 	</select>
 	
-	<select id="get" parameterType="int" resultType="com.example.mvc.domain.Board">
+	<select id="get" parameterType="int" resultType="kr.ko.dury008.mvc.domain.Board">
 		SELECT
 			B.BOARD_SEQ,
+			B.BOARD_TYPE,
 			B.TITLE,
 			B.CONTENTS,
-			B.REG_DATE,
-			B.BOARD_TYPE
+			B.REG_DATE
 		FROM T_BOARD B
 		WHERE B.BOARD_SEQ = #{boardSeq}
 	</select>
-	
-	<insert id="save" parameterType="com.example.mvc.parameter.BoardParameter" useGeneratedKeys="true" keyProperty="boardSeq">
+	<insert id="save" parameterType="kr.ko.dury008.mvc.parameter.BoardParameter" useGeneratedKeys="true" keyProperty="boardSeq">
 		INSERT INTO T_BOARD
 		(
+			BOARD_TYPE,
 			TITLE,
 			CONTENTS,
-			REG_DATE
+			REG_DATE,
+			DEL_YN
 		)
 		VALUES
 		(
+			#{boardType.code},
 			#{title},
 			#{contents},
-			NOW()
+			NOW(),
+			#{delYn, typeHandler=kr.ko.dury008.configuration.mybatis.typehandler.StringValueBooleanTypeHandler}
 		)
 	</insert>
-	
 	<insert id="saveList" parameterType="map">
 		INSERT INTO T_BOARD
 		(
-			TITLE,
-			CONTENTS,
-			REG_DATE
-		)	
+		TITLE,
+		BOARD_TYPE,
+		CONTENTS,
+		REG_DATE
+		)
 		VALUES
-		<foreach collection="boardList" item="board" separator=",">
+		<foreach collection="boardList" item = "board" separator = ",">
 		(
-			#{board.title},
-			#{board.contents},
-			NOW()
+		#{board.title},
+		#{board.boardType.code},
+		#{board.contents},
+		NOW()
 		)
 		</foreach>
 	</insert>
 	
-	<update id="update" parameterType="com.example.mvc.domain.Board">
+	<update id="update" parameterType="kr.ko.dury008.mvc.parameter.BoardParameter">
 		UPDATE T_BOARD
-		SET
+		SET 
+			BOARD_TYPE = #{boardType.code},
 			TITLE = #{title},
-			CONTENTS = #{contents}
+			CONTENTS= #{contents}
 		WHERE BOARD_SEQ = #{boardSeq}
 	</update>
 	

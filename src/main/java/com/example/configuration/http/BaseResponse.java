@@ -8,15 +8,16 @@ public class BaseResponse<T> {
 	private BaseResponseCode code;
 	private String message;
 	private T data;
-	
-	public BaseResponse(T data) {
-		this.code = BaseResponseCode.SUCCESS;
-		this.data = data;
-	}
 
-	public BaseResponse(BaseResponseCode code, String message) {
-		this.code = code;
-		this.message = message;
-	}
-	
+		public BaseResponse(T data) {
+			this.code = BaseResponseCode.SUCCESS;
+			this.message = new String("complete");
+			this.data = data; 
+		}
+		
+		public BaseResponse(BaseResponseCode code, String message) {
+			this.code = code;
+			this.message = message;
+		}
 }
+

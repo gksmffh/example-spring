@@ -6,14 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-public class RequestConfig {
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface RequestConfig { //RequeesConfig 어노테이션 생성
+	boolean loginCheck() default true; //로그인 세션이 구현되있으면 true로 바꾼다
 	
-	@Target(ElementType.METHOD)
-	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	public @interface RequetConfig{
-		
-		boolean loginCheck() default false;
-	}
 }
